@@ -8,6 +8,7 @@ use App\Entity\Bee\BeeInterface;
 use App\Entity\Bee\BeeType;
 use App\Game\AttackServiceInterface;
 use App\Game\GameEngine;
+use App\Game\TurnResult;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -60,7 +61,9 @@ class GameEngineTest extends TestCase
 
         $result = $this->gameEngine->playerTurn();
 
-        $this->assertSame('You missed!', $result);
+        $this->assertInstanceOf(TurnResult::class, $result);
+        $this->assertFalse($result->hit);
+        $this->assertNull($result->bee);
     }
 
     /**
@@ -70,25 +73,44 @@ class GameEngineTest extends TestCase
     {
         $bee = $this->createMock(BeeInterface::class);
         $bee->method('getType')->willReturn(BeeType::Worker);
+        $bee->method('stingDamage')->willReturn(10);
 
         $this->attackService->method('playerAttacksBees')->willReturn($bee);
 
         $result = $this->gameEngine->playerTurn();
 
-        $this->assertSame('You hit a Worker bee!', $result);
+        $this->assertInstanceOf(TurnResult::class, $result);
+        $this->assertTrue($result->hit);
+        $this->assertSame($bee, $result->bee);
+        $this->assertSame(10, $result->damage);
+    }
+
+    public function testBeesTurnMisses(): void
+    {
+        $this->attackService->method('beeAttacksPlayer')->willReturn(null);
+
+        $result = $this->gameEngine->beesTurn();
+
+        $this->assertInstanceOf(TurnResult::class, $result);
+        $this->assertFalse($result->hit);
+        $this->assertNull($result->bee);
     }
 
     /**
      * @throws Exception
      */
-    public function testBeesTurn(): void
+    public function testBeesTurnHitsPlayer(): void
     {
         $bee = $this->createMock(BeeInterface::class);
+        $bee->method('stingDamage')->willReturn(5);
 
         $this->attackService->method('beeAttacksPlayer')->willReturn($bee);
 
         $result = $this->gameEngine->beesTurn();
 
-        $this->assertSame($bee, $result);
+        $this->assertInstanceOf(TurnResult::class, $result);
+        $this->assertTrue($result->hit);
+        $this->assertSame($bee, $result->bee);
+        $this->assertSame(5, $result->damage);
     }
 }

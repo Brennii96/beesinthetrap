@@ -2,7 +2,6 @@
 
 namespace App\Game;
 
-use App\Entity\Bee\BeeInterface;
 use App\Entity\Hive;
 use App\Entity\Player;
 
@@ -28,26 +27,32 @@ class GameEngine
     /**
      * Players turn to attack the bees.
      *
-     * @return string
+     * @return TurnResult
      */
-    public function playerTurn(): string
+    public function playerTurn(): TurnResult
     {
         $bee = $this->attackService->playerAttacksBees($this->player, $this->hive);
 
         if ($bee === null) {
-            return 'You missed!';
+            return new TurnResult(false, null);
         }
 
-        return 'You hit a ' . ucfirst($bee->getType()->value) . ' bee!';
+        return new TurnResult(true, $bee, $bee->stingDamage());
     }
 
     /**
      * Bees take their turn to attack the player.
      *
-     * @return BeeInterface|null
+     * @return TurnResult
      */
-    public function beesTurn(): ?BeeInterface
+    public function beesTurn(): TurnResult
     {
-        return $this->attackService->beeAttacksPlayer($this->player, $this->hive);
+        $bee = $this->attackService->beeAttacksPlayer($this->player, $this->hive);
+
+        if ($bee === null) {
+            return new TurnResult(false, null);
+        }
+
+        return new TurnResult(true, $bee, $bee->stingDamage());
     }
 }
