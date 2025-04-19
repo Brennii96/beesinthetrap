@@ -16,7 +16,7 @@ class AttackServiceTest extends TestCase
         // Set up Player and Hive
         $player = new Player();
         $hive = new Hive(new BeeFactory());
-        $attackService = new AttackService();
+        $attackService = new AttackService(0.7, 0.1);
 
         // Save original HP for comparison
         $originalHp = $player->getHp();
@@ -33,7 +33,7 @@ class AttackServiceTest extends TestCase
         // Set up Player and Hive
         $player = new Player();
         $hive = new Hive(new BeeFactory());
-        $attackService = new AttackService();
+        $attackService = new AttackService(0.7, 0.1);
         $originalHp = $player->getHp();
         $workerBee = $hive->getBeeOfType(BeeType::Worker);
         $this->assertEquals(5, $workerBee->stingDamage(), 'Worker Bee should deal 5 damage.');
@@ -46,7 +46,7 @@ class AttackServiceTest extends TestCase
         // Set up Player and Hive
         $player = new Player();
         $hive = new Hive(new BeeFactory());
-        $attackService = new AttackService();
+        $attackService = new AttackService(0.7, 0.1);
         $originalHp = $player->getHp();
         $droneBee = $hive->getBeeOfType(BeeType::Drone);
         $this->assertEquals(1, $droneBee->stingDamage(), 'Drone Bee should deal 1 damage.');
