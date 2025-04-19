@@ -11,6 +11,19 @@ use PHPUnit\Framework\TestCase;
 
 class AttackServiceTest extends TestCase
 {
+    public function testAllBeesDieWhenQueenDies()
+    {
+        $player = new Player();
+        $hive = new Hive(new BeeFactory());
+        $attackService = new AttackService(0.7, 0.1);
+
+        $queenBee = $hive->getQueen();
+        $queenBee->takeDamage(100);
+        $attackService->playerAttacksBees($player, $hive);
+        $aliveBeesAfterQueenDies = $hive->getAliveBees();
+        $this->assertCount(0, $aliveBeesAfterQueenDies, 'All bees should be dead when the Queen dies.');
+    }
+
     public function testQueenBeeDamageCalculation()
     {
         // Set up Player and Hive

@@ -40,7 +40,7 @@ class AttackService implements AttackServiceInterface
         $player->registerHit();
 
         // if queen is dead, kill all bees
-        if (!$hive->getQueen()) {
+        if (!$hive->getQueen()?->isAlive()) {
             $hive->killAllBees();
         }
 
