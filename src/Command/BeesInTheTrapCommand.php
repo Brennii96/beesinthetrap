@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Hive;
 use App\Entity\Player;
 use App\Game\GameEngine;
+use App\Game\NarratorServiceInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,7 +17,8 @@ class BeesInTheTrapCommand extends Command
     public function __construct(
         private readonly GameEngine $engine,
         private readonly Player $player,
-        private readonly Hive $hive
+        private readonly Hive $hive,
+        private readonly NarratorServiceInterface $narrator
     ) {
         parent::__construct();
     }
@@ -50,13 +52,17 @@ class BeesInTheTrapCommand extends Command
                 }
             }
 
-            $output->writeln($this->engine->playerTurn());
-            $beesTurn = $this->engine->beesTurn();
-            if ($beesTurn !== null) {
-                $output->writeln("Hit");
+            $playerTurn = $this->engine->playerTurn();
+            if ($playerTurn->hit) {
+                $output->writeln($this->narrator->playerHit($playerTurn->bee));
             } else {
-                $output->writeln("All bees are dead! You won!");
-                break;
+                $output->writeln($this->narrator->playerMiss());
+            }
+            $beesTurn = $this->engine->beesTurn();
+            if ($beesTurn->hit) {
+                $output->writeln($this->narrator->beeHit($beesTurn->bee));
+            } else {
+                $output->writeln($this->narrator->beeMiss($beesTurn->bee ?? $playerTurn->bee));
             }
 
             $output->writeln('Your HP: ' . $this->player->getHp());
