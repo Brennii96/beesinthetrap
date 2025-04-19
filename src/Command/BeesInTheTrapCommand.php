@@ -11,6 +11,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 
 class BeesInTheTrapCommand extends Command
 {
@@ -33,10 +34,21 @@ class BeesInTheTrapCommand extends Command
         $attackService = new AttackService();
         $engine = new GameEngine($hive, $player, $attackService);
 
+        $helper = $this->getHelper('question');
         $autoPlay = $input->getOption('auto');
         $output->writeln($autoPlay ? 'Starting auto-play mode...' : '');
 
         while (!$engine->isOver()) {
+            if (!$autoPlay) {
+                $question = new Question('Type "hit" to attack: ');
+                $answer = strtolower(trim($helper->ask($input, $output, $question)));
+
+                if ($answer !== 'hit') {
+                    $output->writeln('Invalid action.');
+                    continue;
+                }
+            }
+
             $output->writeln($engine->playerTurn());
             $beesTurn = $engine->beesTurn();
             if ($beesTurn !== null) {
