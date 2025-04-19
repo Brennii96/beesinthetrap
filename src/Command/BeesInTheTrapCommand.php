@@ -39,41 +39,55 @@ class BeesInTheTrapCommand extends Command
     {
         $helper = $this->getHelper('question');
         $autoPlay = $input->getOption('auto');
-        $output->writeln($autoPlay ? 'Starting auto-play mode...' : '');
-
-        while (!$this->engine->isOver()) {
-            if (!$autoPlay) {
-                $question = new Question('Type "hit" to attack: ');
-                $answer = strtolower(trim($helper->ask($input, $output, $question)));
-
-                if ($answer !== 'hit') {
-                    $output->writeln('Invalid action.');
-                    continue;
-                }
-            }
-
-            $playerTurn = $this->engine->playerTurn();
-            if ($playerTurn->hit) {
-                $output->writeln($this->narrator->playerHit($playerTurn->bee));
-            } else {
-                $output->writeln($this->narrator->playerMiss());
-            }
-            $beesTurn = $this->engine->beesTurn();
-            if ($beesTurn->hit) {
-                $output->writeln($this->narrator->beeHit($beesTurn->bee));
-            } else {
-                $output->writeln($this->narrator->beeMiss($beesTurn->bee ?? $playerTurn->bee));
-            }
-
-            $output->writeln('Your HP: ' . $this->player->getHp());
-            $output->writeln('Bees alive: ' . count($this->hive->getAliveBees()));
+        if ($autoPlay) {
+            $output->writeln($this->narrator->autoPlayMode());
         }
 
-        $output->writeln('--- GAME OVER ---');
-        $output->writeln('Hits dealt: ' . $this->player->getHits());
-        $output->writeln('Stings taken: ' . $this->player->getStings());
-        $output->writeln($this->player->isAlive() ? 'You survived!' : 'You died!');
+        while (!$this->engine->isOver()) {
+            if (!$autoPlay && !$this->checkForPlayerInput($input, $output, $helper)) {
+                continue;
+            }
+            $this->handleTurns($output);
+            $output->writeln($this->narrator->statsAfterTurn($this->player, $this->hive));
+        }
 
+        $output->writeln($this->narrator->gameOver($this->player, $this->hive));
         return Command::SUCCESS;
+    }
+
+    private function handleTurns(OutputInterface $output): void
+    {
+        $playerTurn = $this->engine->playerTurn();
+        $output->writeln(
+            $playerTurn->hit
+                ? $this->narrator->playerHit($playerTurn->bee)
+                : $this->narrator->playerMiss()
+        );
+
+        $beesTurn = $this->engine->beesTurn();
+        $output->writeln(
+            $beesTurn->hit
+                ? $this->narrator->beeHit($beesTurn->bee)
+                : $this->narrator->beeMiss($beesTurn->bee ?? $playerTurn->bee)
+        );
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param $helper
+     * @return bool
+     */
+    private function checkForPlayerInput(InputInterface $input, OutputInterface $output, $helper): bool
+    {
+        $question = new Question($this->narrator->playerInstruction());
+        $answer = strtolower(trim($helper->ask($input, $output, $question)));
+
+        if ($answer !== 'hit') {
+            $output->writeln($this->narrator->invalidAction());
+            return false;
+        }
+
+        return true;
     }
 }
