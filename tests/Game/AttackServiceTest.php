@@ -15,7 +15,7 @@ class AttackServiceTest extends TestCase
     {
         $player = new Player();
         $hive = new Hive(new BeeFactory());
-        $attackService = new AttackService(0.7, 0.1);
+        $attackService = new AttackService(1, 0.1);
 
         $queenBee = $hive->getQueen();
         $queenBee->takeDamage(100);
