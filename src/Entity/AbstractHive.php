@@ -37,6 +37,16 @@ abstract class AbstractHive
     }
 
     /**
+     * @return void
+     */
+    public function killAllBees(): void
+    {
+        foreach ($this->bees as $bee) {
+            $bee->takeDamage($bee->getHp());
+        }
+    }
+
+    /**
      * @return bool
      */
     public function isAlive(): bool
