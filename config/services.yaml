@@ -8,10 +8,12 @@ services:
     tags: [ 'console.command' ]
 
   App\Game\AttackServiceInterface: '@App\Game\AttackService'
+  App\Game\NarratorServiceInterface: '@App\Game\NarratorService'
 
   App\Factory\BeeFactory: ~
   App\Entity\Hive:
     arguments: [ '@App\Factory\BeeFactory' ]
   App\Entity\Player: ~
   App\Game\AttackService: ~
+  App\Game\NarratorService: ~
   App\Game\GameEngine: ~
