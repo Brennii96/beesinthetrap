@@ -11,4 +11,6 @@ interface BeeInterface
     public function takeDamage(int $damage): void;
 
     public function isAlive(): bool;
+
+    public function stingDamage(): int;
 }
