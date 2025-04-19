@@ -1,8 +1,15 @@
+parameters:
+  game.player_hit_chance: 0.7
+  game.bee_hit_chance: 0.1
+
 services:
   _defaults:
     autowire: true
     autoconfigure: true
     public: true
+    bind:
+      float $playerHitChance: '%game.player_hit_chance%'
+      float $beeHitChance: '%game.bee_hit_chance%'
 
   App\Command\BeesInTheTrapCommand:
     tags: [ 'console.command' ]

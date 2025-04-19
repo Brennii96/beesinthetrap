@@ -9,8 +9,8 @@ use App\Entity\Player;
 class AttackService implements AttackServiceInterface
 {
     public function __construct(
-        private readonly float $playerHitChance = 0.7,
-        private readonly float $beeHitChance = 0.5
+        private readonly float $playerHitChance,
+        private readonly float $beeHitChance
     ) {
     }
 
@@ -98,6 +98,6 @@ class AttackService implements AttackServiceInterface
      */
     private function isHitSuccessful(float $chance): bool
     {
-        return mt_rand(0, 99) / 100 <= $chance;
+        return mt_rand(0, 100) / 100 <= $chance;
     }
 }
