@@ -3,6 +3,8 @@
 namespace App\Game;
 
 use App\Entity\Bee\BeeInterface;
+use App\Entity\Hive;
+use App\Entity\Player;
 
 class NarratorService implements NarratorServiceInterface
 {
@@ -27,6 +29,51 @@ class NarratorService implements NarratorServiceInterface
         'Safe! The %s bee couldn\'t land the sting!',
     ];
 
+    public function gameOver(Player $player, Hive $hive): string
+    {
+        $lines = [];
+        $lines[] = '--- GAME OVER ---';
+        $lines[] = 'Hits dealt: ' . $player->getHits();
+        $lines[] = 'Stings taken: ' . $player->getStings();
+
+        $aliveBees = $hive->getAliveBees();
+        if (count($aliveBees) > 0) {
+            $grouped = [];
+            foreach ($aliveBees as $bee) {
+                $type = $bee->getType()->name;
+                $grouped[$type] = ($grouped[$type] ?? 0) + 1;
+            }
+
+            foreach ($grouped as $type => $count) {
+                $lines[] = "$count $type Bee" . ($count > 1 ? 's' : '') . ' remaining';
+            }
+        } else {
+            $lines[] = 'No bees remain!';
+        }
+
+        $lines[] = $player->isAlive() ? 'You survived!' : 'You died!';
+
+        return implode(PHP_EOL, $lines);
+    }
+
+    public function playerInstruction(): string
+    {
+        return 'Type "hit" to attack: ';
+    }
+
+    public function autoPlayMode(): string
+    {
+        return "Starting auto-play mode...";
+    }
+
+    public function statsAfterTurn(Player $player, Hive $hive): string
+    {
+        $lines = [];
+        $lines[] = 'Hits dealt: ' . $player->getHits();
+        $lines[] = 'Stings taken: ' . $player->getStings();
+        return implode(PHP_EOL, $lines);
+    }
+
     public function playerHit(BeeInterface $bee): string
     {
         return sprintf($this->randomMessage($this->playerHitMessages), strtolower($bee->getType()->value));
@@ -50,5 +97,10 @@ class NarratorService implements NarratorServiceInterface
     private function randomMessage(array $messages): string
     {
         return $messages[array_rand($messages)];
+    }
+
+    public function invalidAction(): string
+    {
+        return 'Invalid action.';
     }
 }
