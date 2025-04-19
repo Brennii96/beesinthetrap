@@ -4,8 +4,6 @@ namespace App\Command;
 
 use App\Entity\Hive;
 use App\Entity\Player;
-use App\Factory\BeeFactory;
-use App\Game\AttackService;
 use App\Game\GameEngine;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,6 +13,14 @@ use Symfony\Component\Console\Question\Question;
 
 class BeesInTheTrapCommand extends Command
 {
+    public function __construct(
+        private readonly GameEngine $engine,
+        private readonly Player $player,
+        private readonly Hive $hive
+    ) {
+        parent::__construct();
+    }
+
     protected function configure(): void
     {
         $this->setName('beesinthetrap:play')
@@ -29,16 +35,11 @@ class BeesInTheTrapCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $hive = new Hive(new BeeFactory());
-        $player = new Player();
-        $attackService = new AttackService();
-        $engine = new GameEngine($hive, $player, $attackService);
-
         $helper = $this->getHelper('question');
         $autoPlay = $input->getOption('auto');
         $output->writeln($autoPlay ? 'Starting auto-play mode...' : '');
 
-        while (!$engine->isOver()) {
+        while (!$this->engine->isOver()) {
             if (!$autoPlay) {
                 $question = new Question('Type "hit" to attack: ');
                 $answer = strtolower(trim($helper->ask($input, $output, $question)));
@@ -49,8 +50,8 @@ class BeesInTheTrapCommand extends Command
                 }
             }
 
-            $output->writeln($engine->playerTurn());
-            $beesTurn = $engine->beesTurn();
+            $output->writeln($this->engine->playerTurn());
+            $beesTurn = $this->engine->beesTurn();
             if ($beesTurn !== null) {
                 $output->writeln("Hit");
             } else {
@@ -58,13 +59,14 @@ class BeesInTheTrapCommand extends Command
                 break;
             }
 
-            $output->writeln('Your HP: ' . $player->getHp());
-            $output->writeln('Bees alive: ' . count($hive->getAliveBees()));
+            $output->writeln('Your HP: ' . $this->player->getHp());
+            $output->writeln('Bees alive: ' . count($this->hive->getAliveBees()));
         }
+
         $output->writeln('--- GAME OVER ---');
-        $output->writeln('Hits dealt: ' . $player->getHits());
-        $output->writeln('Stings taken: ' . $player->getStings());
-        $output->writeln($player->isAlive() ? 'You survived!' : 'You died!');
+        $output->writeln('Hits dealt: ' . $this->player->getHits());
+        $output->writeln('Stings taken: ' . $this->player->getStings());
+        $output->writeln($this->player->isAlive() ? 'You survived!' : 'You died!');
 
         return Command::SUCCESS;
     }

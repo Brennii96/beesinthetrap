@@ -1,0 +1,17 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  App\Command\BeesInTheTrapCommand:
+    tags: [ 'console.command' ]
+
+  App\Game\AttackServiceInterface: '@App\Game\AttackService'
+
+  App\Factory\BeeFactory: ~
+  App\Entity\Hive:
+    arguments: [ '@App\Factory\BeeFactory' ]
+  App\Entity\Player: ~
+  App\Game\AttackService: ~
+  App\Game\GameEngine: ~
