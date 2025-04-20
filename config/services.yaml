@@ -1,6 +1,7 @@
 parameters:
   game.player_hit_chance: 0.7
   game.bee_hit_chance: 0.1
+  game.delay_between_turns: 0
 
 services:
   _defaults:
@@ -10,6 +11,7 @@ services:
     bind:
       float $playerHitChance: '%game.player_hit_chance%'
       float $beeHitChance: '%game.bee_hit_chance%'
+      float $delayBetweenTurns: '%game.delay_between_turns%'
 
   App\Command\BeesInTheTrapCommand:
     tags: [ 'console.command' ]

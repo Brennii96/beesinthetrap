@@ -7,6 +7,7 @@ use App\Entity\Player;
 use App\Game\GameEngine;
 use App\Game\NarratorServiceInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,7 +19,8 @@ class BeesInTheTrapCommand extends Command
         private readonly GameEngine $engine,
         private readonly Player $player,
         private readonly Hive $hive,
-        private readonly NarratorServiceInterface $narrator
+        private readonly NarratorServiceInterface $narrator,
+        private readonly float $delayBetweenTurns = 0,
     ) {
         parent::__construct();
     }
@@ -38,6 +40,7 @@ class BeesInTheTrapCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $helper = $this->getHelper('question');
+        $this->setStyles($output);
         $autoPlay = $input->getOption('auto');
         if ($autoPlay) {
             $output->writeln($this->narrator->autoPlayMode());
@@ -55,21 +58,61 @@ class BeesInTheTrapCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function setStyles(OutputInterface $output): void
+    {
+        $positiveStyle = new OutputFormatterStyle('green', null, ['bold']);
+        $warningStyle = new OutputFormatterStyle('yellow', null, ['bold']);
+        $negativeStyle = new OutputFormatterStyle('red', null, ['bold']);
+        $output->getFormatter()->setStyle('positive', $positiveStyle);
+        $output->getFormatter()->setStyle('negative', $negativeStyle);
+        $output->getFormatter()->setStyle('warning', $warningStyle);
+    }
+
+    /**
+     * @param OutputInterface $output
+     * @return void
+     */
     private function handleTurns(OutputInterface $output): void
+    {
+        $this->handlePlayerTurn($output);
+
+        if ($this->engine->isOver()) {
+            return;
+        }
+
+        $this->handleBeesTurn($output);
+    }
+
+    private function handlePlayerTurn(OutputInterface $output): void
     {
         $playerTurn = $this->engine->playerTurn();
         $output->writeln(
             $playerTurn->hit
-                ? $this->narrator->playerHit($playerTurn->bee)
-                : $this->narrator->playerMiss()
+                ? '<positive>' . $this->narrator->playerHit($playerTurn->bee) . '</positive>'
+                : '<negative>' . $this->narrator->playerMiss() . '</negative>'
         );
 
+        $this->delayIfEnabled();
+    }
+
+    private function handleBeesTurn(OutputInterface $output): void
+    {
+        $output->writeln('<warning>' . $this->narrator->beesAttacking() . '</warning>');
         $beesTurn = $this->engine->beesTurn();
         $output->writeln(
             $beesTurn->hit
-                ? $this->narrator->beeHit($beesTurn->bee)
-                : $this->narrator->beeMiss($beesTurn->bee ?? $playerTurn->bee)
+                ? '<negative>' . $this->narrator->beeHit($beesTurn->bee) . '</negative>'
+                : '<positive>' . $this->narrator->beeMiss($beesTurn->bee) . '</positive>'
         );
+
+        $this->delayIfEnabled();
+    }
+
+    private function delayIfEnabled(): void
+    {
+        if ($this->delayBetweenTurns > 0) {
+            usleep($this->delayBetweenTurns * 1000000);
+        }
     }
 
     /**

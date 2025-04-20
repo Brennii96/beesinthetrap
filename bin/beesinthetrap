@@ -3,8 +3,8 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Symfony\Component\Console\Application;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
@@ -17,7 +17,6 @@ try {
     $application = new Application();
 
     foreach ($container->findTaggedServiceIds('console.command') as $id => $tags) {
-        echo "Adding command: $id\n";
         $application->add($container->get($id));
     }
 
