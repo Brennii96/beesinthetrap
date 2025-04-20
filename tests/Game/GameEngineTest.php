@@ -2,13 +2,14 @@
 
 namespace App\Tests\Game;
 
-use App\Entity\Hive;
-use App\Entity\Player;
+use App\DTO\BeeAttackResult;
+use App\DTO\TurnResult;
 use App\Entity\Bee\BeeInterface;
 use App\Entity\Bee\BeeType;
+use App\Entity\Hive;
+use App\Entity\Player;
 use App\Game\AttackServiceInterface;
 use App\Game\GameEngine;
-use App\Game\TurnResult;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -75,7 +76,9 @@ class GameEngineTest extends TestCase
         $bee->method('getType')->willReturn(BeeType::Worker);
         $bee->method('stingDamage')->willReturn(10);
 
-        $this->attackService->method('playerAttacksBees')->willReturn($bee);
+        $this->attackService->method('playerAttacksBees')->willReturn(
+            new \App\DTO\PlayerAttackResult($bee, true, 10)  // <- return a PlayerAttackResult, not just the bee
+        );
 
         $result = $this->gameEngine->playerTurn();
 
@@ -104,7 +107,9 @@ class GameEngineTest extends TestCase
         $bee = $this->createMock(BeeInterface::class);
         $bee->method('stingDamage')->willReturn(5);
 
-        $this->attackService->method('beeAttacksPlayer')->willReturn($bee);
+        $this->attackService->method('beeAttacksPlayer')->willReturn(
+            new BeeAttackResult($bee, true)
+        );
 
         $result = $this->gameEngine->beesTurn();
 

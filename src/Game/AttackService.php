@@ -2,6 +2,8 @@
 
 namespace App\Game;
 
+use App\DTO\BeeAttackResult;
+use App\DTO\PlayerAttackResult;
 use App\Entity\Bee\BeeInterface;
 use App\Entity\Hive;
 use App\Entity\Player;
@@ -17,15 +19,10 @@ class AttackService implements AttackServiceInterface
     /**
      * @param Player $player
      * @param Hive $hive
-     * @return BeeInterface|null
+     * @return PlayerAttackResult|null
      */
-    public function playerAttacksBees(Player $player, Hive $hive): ?BeeInterface
+    public function playerAttacksBees(Player $player, Hive $hive): ?PlayerAttackResult
     {
-        // Check whether player should hit bee
-        if (!$this->isHitSuccessful($this->playerHitChance)) {
-            return null;
-        }
-
         // if all bees are dead, there's no one to hit
         $bees = $hive->getAliveBees();
         if (empty($bees)) {
@@ -34,25 +31,28 @@ class AttackService implements AttackServiceInterface
 
         // choose a bee at random and hit it
         $bee = $bees[array_rand($bees)];
-        $bee->takeDamage($bee->stingDamage());
+        $hit = false;
+        if ($this->isHitSuccessful($this->playerHitChance)) {
+            $bee->hit();
+            // keep track of player's hits'
+            $player->registerHit();
+            $hit = true;
 
-        // keep track of player's hits'
-        $player->registerHit();
-
-        // if queen is dead, kill all bees
-        if (!$hive->getQueen()?->isAlive()) {
-            $hive->killAllBees();
+            // if queen is dead, kill all bees
+            if (!$hive->getQueen()?->isAlive()) {
+                $hive->killAllBees();
+            }
         }
 
-        return $bee;
+        return new PlayerAttackResult($bee, $hit);
     }
 
     /**
      * @param Player $player
      * @param Hive $hive
-     * @return BeeInterface|null
+     * @return BeeAttackResult|null
      */
-    public function beeAttacksPlayer(Player $player, Hive $hive): ?BeeInterface
+    public function beeAttacksPlayer(Player $player, Hive $hive): BeeAttackResult|null
     {
         // get all remaining bees
         $aliveBees = $hive->getAliveBees();
@@ -64,12 +64,14 @@ class AttackService implements AttackServiceInterface
 
         // choose a random bee to use, if attack successful keep track of players' stings and lower health
         $randomBee = $aliveBees[array_rand($aliveBees)];
+        $hit = false;
         if ($this->isHitSuccessful($this->beeHitChance)) {
             $player->takeDamage($randomBee->stingDamage());
             $player->registerSting();
+            $hit = true;
         }
 
-        return $randomBee;
+        return new BeeAttackResult($randomBee, $hit);
     }
 
     /**

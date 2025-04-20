@@ -2,6 +2,7 @@
 
 namespace App\Game;
 
+use App\DTO\TurnResult;
 use App\Entity\Hive;
 use App\Entity\Player;
 
@@ -31,13 +32,17 @@ class GameEngine
      */
     public function playerTurn(): TurnResult
     {
-        $bee = $this->attackService->playerAttacksBees($this->player, $this->hive);
+        $resultOfAttack = $this->attackService->playerAttacksBees($this->player, $this->hive);
 
-        if ($bee === null) {
+        if ($resultOfAttack === null) {
             return new TurnResult(false, null);
         }
 
-        return new TurnResult(true, $bee, $bee->stingDamage());
+        return new TurnResult(
+            $resultOfAttack->hit,
+            $resultOfAttack->bee,
+            $resultOfAttack->bee->stingDamage()
+        );
     }
 
     /**
@@ -47,12 +52,15 @@ class GameEngine
      */
     public function beesTurn(): TurnResult
     {
-        $bee = $this->attackService->beeAttacksPlayer($this->player, $this->hive);
+        $resultOfAttack = $this->attackService->beeAttacksPlayer($this->player, $this->hive);
 
-        if ($bee === null) {
+        if ($resultOfAttack === null) {
             return new TurnResult(false, null);
         }
-
-        return new TurnResult(true, $bee, $bee->stingDamage());
+        return new TurnResult(
+            $resultOfAttack->hit,
+            $resultOfAttack->bee,
+            $resultOfAttack->bee->stingDamage()
+        );
     }
 }
