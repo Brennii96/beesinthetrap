@@ -13,6 +13,10 @@ class NarratorService implements NarratorServiceInterface
         'Bullseye! You took %s down!'
     ];
 
+    private array $beesAttackingMessages = [
+        'Bees preparing counter attack, prepare yourself!',
+    ];
+
     private array $playerMissMessages = [
         'Miss! You just missed the hive, better luck next time!',
         'Oops! You completely missed!',
@@ -51,7 +55,7 @@ class NarratorService implements NarratorServiceInterface
             $lines[] = 'No bees remain!';
         }
 
-        $lines[] = $player->isAlive() ? 'You survived!' : 'You died!';
+        $lines[] = $player->isAlive() ? '<positive>You survived!</positive>' : '<negative>You died!</negative>';
 
         return implode(PHP_EOL, $lines);
     }
@@ -64,6 +68,11 @@ class NarratorService implements NarratorServiceInterface
     public function autoPlayMode(): string
     {
         return "Starting auto-play mode...";
+    }
+
+    public function beesAttacking(): string
+    {
+        return $this->randomMessage($this->beesAttackingMessages);
     }
 
     public function statsAfterTurn(Player $player, Hive $hive): string
