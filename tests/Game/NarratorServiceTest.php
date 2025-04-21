@@ -2,11 +2,11 @@
 
 namespace App\Tests\Game;
 
+use App\Entity\Bee\BeeInterface;
 use App\Entity\Bee\BeeType;
 use App\Entity\Hive;
 use App\Entity\Player;
 use App\Game\NarratorService;
-use App\Entity\Bee\BeeInterface;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -26,6 +26,8 @@ class NarratorServiceTest extends TestCase
         $this->bee
             ->method('getType')
             ->willReturn(BeeType::Queen);
+        $this->bee->method('stingDamage')
+            ->willReturn(10);
     }
 
     public function testPlayerHitReturnsMessage(): void

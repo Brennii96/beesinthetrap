@@ -26,7 +26,7 @@ class NarratorService implements NarratorServiceInterface
     private array $beeHitMessages = [
         'Sting! A {type} bee stung you!',
         'Ouch! You got hit by a {type} bee!',
-        'Direct Hit! You took {damage} from a {type} bee!'
+        'Direct Hit! You took {damage} hit points from a {type} bee!'
     ];
 
     private array $beeMissMessages = [
@@ -106,6 +106,7 @@ ASCII;
     {
         $replace = [
             '{type}' => strtolower($bee->getType()->value),
+            '{damage}' => $bee->stingDamage()
         ];
         return $this->buildMessage($this->randomMessage($this->playerHitMessages), $replace);
     }
@@ -119,6 +120,7 @@ ASCII;
     {
         $replace = [
             '{type}' => strtolower($bee->getType()->value),
+            '{damage}' => $bee->stingDamage()
         ];
         return $this->buildMessage($this->randomMessage($this->beeHitMessages), $replace);
     }
