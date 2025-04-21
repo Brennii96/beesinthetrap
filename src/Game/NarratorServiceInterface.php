@@ -27,4 +27,6 @@ interface NarratorServiceInterface
     public function beeMiss(BeeInterface $bee): string;
 
     public function playerHit(BeeInterface $bee): string;
+
+    public function gameIntro(): string;
 }

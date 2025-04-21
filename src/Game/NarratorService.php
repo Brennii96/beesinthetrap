@@ -9,8 +9,8 @@ use App\Entity\Player;
 class NarratorService implements NarratorServiceInterface
 {
     private array $playerHitMessages = [
-        'Direct Hit! You hit a %s bee!',
-        'Bullseye! You took %s down!'
+        'Direct Hit! You hit a {type} bee!',
+        'Bullseye! You took {type} down!'
     ];
 
     private array $beesAttackingMessages = [
@@ -24,14 +24,33 @@ class NarratorService implements NarratorServiceInterface
     ];
 
     private array $beeHitMessages = [
-        'Sting! A %s bee stung you!',
-        'Ouch! You got hit by a %s bee!'
+        'Sting! A {type} bee stung you!',
+        'Ouch! You got hit by a {type} bee!',
+        'Direct Hit! You took {damage} from a {type} bee!'
     ];
 
     private array $beeMissMessages = [
-        'Buzz! That was close! The %s bee missed!',
-        'Safe! The %s bee couldn\'t land the sting!',
+        'Buzz! That was close! The {type} bee missed!',
+        'Safe! The {type} bee couldn\'t land the sting!',
     ];
+
+    /**
+     * ASCII art generated using http://patorjk.com/software/taag/
+     * @return string
+     */
+    public function gameIntro(): string
+    {
+        return <<<ASCII
+______                  _         _   _            _                   
+| ___ \                (_)       | | | |          | |                  
+| |_/ / ___  ___  ___   _ _ __   | |_| |__   ___  | |_ _ __ __ _ _ __  
+| ___ \/ _ \/ _ \/ __| | | '_ \  | __| '_ \ / _ \ | __| '__/ _` | '_ \ 
+| |_/ /  __/  __/\__ \ | | | | | | |_| | | |  __/ | |_| | | (_| | |_) |
+\____/ \___|\___||___/ |_|_| |_|  \__|_| |_|\___|  \__|_|  \__,_| .__/ 
+                                                                | |    
+                                                                |_|
+ASCII;
+    }
 
     public function gameOver(Player $player, Hive $hive): string
     {
@@ -85,7 +104,10 @@ class NarratorService implements NarratorServiceInterface
 
     public function playerHit(BeeInterface $bee): string
     {
-        return sprintf($this->randomMessage($this->playerHitMessages), strtolower($bee->getType()->value));
+        $replace = [
+            '{type}' => strtolower($bee->getType()->value),
+        ];
+        return $this->buildMessage($this->randomMessage($this->playerHitMessages), $replace);
     }
 
     public function playerMiss(): string
@@ -95,16 +117,34 @@ class NarratorService implements NarratorServiceInterface
 
     public function beeHit(BeeInterface $bee): string
     {
-        return sprintf($this->randomMessage($this->beeHitMessages), strtolower($bee->getType()->value));
+        $replace = [
+            '{type}' => strtolower($bee->getType()->value),
+        ];
+        return $this->buildMessage($this->randomMessage($this->beeHitMessages), $replace);
     }
 
     public function beeMiss(BeeInterface $bee): string
     {
-        return sprintf($this->randomMessage($this->beeMissMessages), strtolower($bee->getType()->value));
+        $replace = [
+            '{type}' => strtolower($bee->getType()->value),
+            '{damage}' => $bee->stingDamage()
+        ];
+        return $this->buildMessage($this->randomMessage($this->beeMissMessages), $replace);
+    }
+
+    private function buildMessage(string $message, array $replacements): string
+    {
+        if (empty($replacements)) {
+            return $message;
+        }
+        return strtr($message, $replacements);
     }
 
     private function randomMessage(array $messages): string
     {
+        if (empty($messages)) {
+            throw new \RuntimeException('No messages available to choose from.');
+        }
         return $messages[array_rand($messages)];
     }
 
