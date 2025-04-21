@@ -39,23 +39,30 @@ class BeesInTheTrapCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $helper = $this->getHelper('question');
-        $this->setStyles($output);
-        $autoPlay = $input->getOption('auto');
-        if ($autoPlay) {
-            $output->writeln($this->narrator->autoPlayMode());
-        }
-
-        while (!$this->engine->isOver()) {
-            if (!$autoPlay && !$this->checkForPlayerInput($input, $output, $helper)) {
-                continue;
+        try {
+            $output->writeln($this->narrator->gameIntro());
+            $helper = $this->getHelper('question');
+            $this->setStyles($output);
+            $autoPlay = $input->getOption('auto');
+            if ($autoPlay) {
+                $output->writeln($this->narrator->autoPlayMode());
             }
-            $this->handleTurns($output);
-            $output->writeln($this->narrator->statsAfterTurn($this->player, $this->hive));
-        }
 
-        $output->writeln($this->narrator->gameOver($this->player, $this->hive));
-        return Command::SUCCESS;
+            while (!$this->engine->isOver()) {
+                if (!$autoPlay && !$this->checkForPlayerInput($input, $output, $helper)) {
+                    continue;
+                }
+                $this->handleTurns($output);
+                $output->writeln($this->narrator->statsAfterTurn($this->player, $this->hive));
+            }
+
+            $output->writeln($this->narrator->gameOver($this->player, $this->hive));
+            return Command::SUCCESS;
+        } catch (\Throwable $e) {
+            // error_log($e->getMessage());
+            $output->writeln('<error>Something bad happened and the Bees have taken over.</error>');;
+            return Command::FAILURE;
+        }
     }
 
     private function setStyles(OutputInterface $output): void
