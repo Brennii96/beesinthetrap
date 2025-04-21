@@ -47,10 +47,12 @@ abstract class AbstractHive
     }
 
     /**
+     * Hive dies when either all bees are dead or the queen is dead.
+     *
      * @return bool
      */
     public function isAlive(): bool
     {
-        return !empty($this->getAliveBees());
+        return !$this->getQueen() || !empty($this->getAliveBees());
     }
 }
