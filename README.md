@@ -48,7 +48,7 @@ bear in mind 0.2 === 2ms.
 
 ```yaml
 parameters:
-  game.player_hit_chance: 0.7
-  game.bee_hit_chance: 0.1
+  game.player_hit_chance: 0.5
+  game.bee_hit_chance: 0.3
   game.delay_between_turns: 0
 ```
