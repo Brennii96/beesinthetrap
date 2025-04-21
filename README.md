@@ -2,7 +2,6 @@
 
 To get started, you must have Docker OR php8.4-cli and composer installed. For speed and ease of use, Docker is
 recommended.
-This is written under the assumption that you are running Linux.
 
 If docker is installed, run:
 
@@ -40,6 +39,8 @@ Follow the instructions until the end OR:
 ```bash
 ./bin/beesinthetrap --auto
 ```
+
+If not auto-playing, there's an option to quit early, type either `quit` or `exit` when asked for input.
 
 There are settings in the config/services.yaml for "difficulty" essentially the chances of a player or a bee landing a
 hit. Also if you want the game to feel more natural and slightly less robotic there's the option to add a delay between

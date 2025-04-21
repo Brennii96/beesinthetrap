@@ -133,6 +133,10 @@ class BeesInTheTrapCommand extends Command
         $question = new Question($this->narrator->playerInstruction());
         $answer = strtolower(trim($helper->ask($input, $output, $question)));
 
+        if ($answer === 'exit' || $answer === 'quit') {
+            $output->writeln($this->narrator->gameOver($this->player, $this->hive));
+            exit;
+        }
         if ($answer !== 'hit') {
             $output->writeln($this->narrator->invalidAction());
             return false;
